@@ -8,24 +8,15 @@ const mockUsers = [
     { "date": "2016-01-07", "user_id": 1, "user_type": "natural", "type": "cash_out", "operation": { "amount": 1000.00, "currency": "EUR" } }
 ];
 
-test('correct rounding', async () => {
-    expect.assertions(1)
-    expect(await evaluate.getFee(mockUsers[1])).toEqual("0.05");//~0.041 without rounding
-});
+const [cash_in_config, cash_out_natural_config, cash_out_legal_config] = [
+    { "max": { "amount": 5, "currency": "EUR" }, "percents": 0.03 },
+    { "percents": 0.3, "week_limit": { "amount": 1000, "currency": "EUR" } },
+    { "min": { "amount": 0.5, "currency": "EUR" }, "percents": 0.3 }
+];
 
-describe('commissions are calculated by operation and user type', () => {
-    test('commissions with cash in operation', async () => {
-        expect.assertions(1)
-        expect(await evaluate.getFee(mockUsers[0])).toEqual("0.09");
-    });
-    test('commissions with cash out operation and legal type user', async () => {
-        expect.assertions(1)
-        expect(await evaluate.getFee(mockUsers[2])).toEqual("0.90");
-    });
-    test('commissions with cash out operation and natural type user', async () => {
-        expect.assertions(1)
-        expect(await evaluate.getFee(mockUsers[3])).toEqual("87.00");
-    });
+test('commissions are calculated by operation and user type', async () => {
+    expect.assertions(1);
+    expect(await evaluate.getFee(mockUsers, [cash_in_config, cash_out_natural_config, cash_out_legal_config])).toEqual([0.09, 0.05, 0.9, 87, 3]);
 });
 
 

@@ -1,25 +1,21 @@
-const configurations = require('./configurations');
+
 const cash_in = require('./cash_in');
 const cash_out_legal = require('./cash_out_legal');
 const cash_out_natural = require('./cash_out_natural');
 
-const cashInApi = 'http://private-38e18c-uzduotis.apiary-mock.com/config/cash-in';
-const cashOutApiNatural = 'http://private-38e18c-uzduotis.apiary-mock.com/config/cash-out/natural';
-const cashOutApiLegal = 'http://private-38e18c-uzduotis.apiary-mock.com/config/cash-out/juridical';
-
-async function getFee(user) {
-
-    if (user.type === 'cash_in') {
-        const configCashIn = await configurations.getConfig(cashInApi);
-        return cash_in.cashIn(user.operation.amount, configCashIn);
-    } else if (user.user_type === 'natural') {
-        const configNatural = await configurations.getConfig(cashOutApiNatural);
-        return cash_out_natural.cashOutNatural(user, configNatural);
-    } else {
-        const configLegal = await configurations.getConfig(cashOutApiLegal);
-        return cash_out_legal.cashOutLegal(user.operation.amount, configLegal);
-
-    }
-}
+async function getFee(users, [cash_in_config, cash_out_natural_config, cash_out_legal_config]) {
+    return users.map(user => {
+        if (user.type === 'cash_in') {
+            const cashin = cash_in.cashIn(user.operation.amount, cash_in_config);
+            return cashin;
+        } else if (user.user_type === 'natural') {
+            const natural = cash_out_natural.cashOutNatural(user, cash_out_natural_config);
+            return natural;
+        } else {
+            const legal = cash_out_legal.cashOutLegal(user.operation.amount, cash_out_legal_config);
+            return legal;
+        }
+    });
+};
 
 module.exports = { getFee };

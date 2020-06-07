@@ -1,7 +1,8 @@
-function cashIn(money, config) {
+const general = require('./general');
 
-    const fee = Math.ceil(money * config.percents) / 100; //to round up
-    return (fee < config.max.amount ? fee.toFixed(2) : config.max.amount.toFixed(2));
+function cashIn(money, config) {
+    const fee = general.countFee(money, config.percents);
+    return (fee < config.max.amount ? fee : config.max.amount);
 }
 
 module.exports = { cashIn };

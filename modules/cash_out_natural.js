@@ -1,12 +1,17 @@
-const week_number = require('./week_number');
+const general = require('./general');
+const moment = require('moment');
+
+//get week number
+
+const week = date => moment(date).isoWeek();
 
 //create one week history
 let oneWeekHistory;
 let weekNo;
 
 function cashOutNatural(user, config) {
-    if (weekNo !== week_number.week(user.date)) {
-        weekNo = week_number.week(user.date);
+    if (weekNo !== week(user.date)) {
+        weekNo = week(user.date);
         oneWeekHistory = [];
         oneWeekHistory.push(user);
         return countCashOutFeeNatural(user.operation.amount, config);
@@ -28,24 +33,26 @@ function checkUserHistory(weekHistory, config) {
         for (let i = 0; i < oneUserHistory.length; i++) {
             totalMoney += oneUserHistory[i].operation.amount;
         }
-        return countCashOutFeeNatural(weekHistory[weekHistory.length - 1].operation.amount, config, 1000);
+        if (totalMoney - config.week_limit.amount < config.week_limit.amount) {
+            return countCashOutFeeNatural(totalMoney, config, config.week_limit.amount);
+        } else {
+            return countCashOutFeeNatural(weekHistory[weekHistory.length - 1].operation.amount, config, config.week_limit.amount);
+        }
     }
 }
 
-//count fee
+//evaluate how to count fee
 function countCashOutFeeNatural(money, config, limit = 0) {
-    const freeLimit = config.week_limit.amount;
     let fee = 0;
-    if (money + limit <= freeLimit) {
-        return fee.toFixed(2);
-
-    } else if (money > 1000) {
-        fee = Math.ceil((money - freeLimit) * config.percents) / 100;
-        return fee.toFixed(2);
-
+    if (money + limit <= config.week_limit.amount) {
+        return fee;
+    } else if (money > config.week_limit.amount) {
+        money -= config.week_limit.amount;
+        fee = general.countFee(money, config.percents);
+        return fee;
     } else {
-        fee = Math.ceil(money * config.percents) / 100;
-        return fee.toFixed(2);
+        fee = general.countFee(money, config.percents);
+        return fee;
     }
 }
 
