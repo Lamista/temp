@@ -13,7 +13,7 @@
 
 Program created using Node.
 
-#### Program created for this situationa and task:
+#### Situation and task:
 
 Users want to cash in and/or cash out from their account. There are also commission fees for both cash in and cash out. Calculate commission fees using API configurations for both operations.
 
